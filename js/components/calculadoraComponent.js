@@ -54,7 +54,7 @@ class CalculadoraBasica extends HTMLElement{
     this.mostrarResultado(resultado);
     this.emitirEvento(resultado);
     this.agregarAlHistorial(entradas.n1, entradas.n2, simbolo, resultado);
-  }
+    }
 
   // Metodo para leer las entradas del input text del selec menu
   leerEntradas() {
@@ -95,7 +95,50 @@ class CalculadoraBasica extends HTMLElement{
     return { resultado, simbolo };
   }
 
-  
+  //Metodo para mostrar el resultado en el componente
+  //Recibe como parametro el resultado de la operación
+  mostrarResultado(resultado) {
+    // Obtenemos el elemento del resultado y actualizamos su contenido
+    const resEl = this.shadowRoot.getElementById('resultado');
+    resEl.textContent = `Resultado: ${resultado}`;
+    resEl.classList.remove('d-none', 'alert-danger');
+    resEl.classList.add('alert-info');
+  }
+
+  //Este metodo tomca como parameto run mensaje y lo muestra en el componente
+  // en caso de error, actualizando el elemento del resultado
+  mostrarError(mensaje) {
+    const resEl = this.shadowRoot.getElementById('resultado');
+    resEl.textContent = mensaje;
+    resEl.classList.remove('d-none', 'alert-info');
+    resEl.classList.add('alert-danger');
+  }
+
+  //Este metodo toma como parametros los numeros, el simbolo de la operación
+  // y el resultado, y lo agrega al historial del componente haciendo una concatenacion usando templatte literals
+  agregarAlHistorial(n1, n2, simbolo, resultado) {
+    const historialEl = this.shadowRoot.getElementById('historial');
+    const item = document.createElement('li');
+    item.className = 'list-group-item';
+    item.textContent = `${n1} ${simbolo} ${n2} = ${resultado}`;
+    historialEl.prepend(item);
+  }
+
+  //Metodo que tomca como parametro un resultado y emite un evento personalizado
+  // para que otros componentes puedan escuchar este evento
+  emitirEvento(resultado) {
+    // Dispara (emite) un evento personalizado desde este componente
+  this.dispatchEvent(
+    new CustomEvent('resultado-calculado', { // Crea un evento llamado 'resultado-calculado'
+      // Incluye un objeto con el dato 'resultado' dentro de la propiedad 'detail'
+      detail: { resultado },
+        // Permite que el evento burbujee (suba por el DOM). Útil si se quiere capturar en un elemento contenedor
+      bubbles: true, 
+      composed: true // Permite que el evento salga del Shadow DOM y sea capturable en el DOM principal
+
+    }));
+  }
+
 }
 
 customElements.define('calculadora-basica', CalculadoraBasica);
